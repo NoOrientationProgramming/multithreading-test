@@ -70,6 +70,8 @@ myApp = executable(
 		'main/main.cpp',
 		'main/AppSupervising.cpp',
 		'main/MultiThreading.cpp',
+		'main/SizeStackPrinting.cpp',
+		'main/LibDriverCustom.cpp',
 	],
 	include_directories : include_directories([
 		'components/ProcessingCore',

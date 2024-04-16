@@ -23,31 +23,30 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MULTI_THREADING_H
-#define MULTI_THREADING_H
+#ifndef SIZE_STACK_PRINTING_H
+#define SIZE_STACK_PRINTING_H
 
 #include "Processing.h"
-#include "SizeStackPrinting.h"
 
-class MultiThreading : public Processing
+class SizeStackPrinting : public Processing
 {
 
 public:
 
-	static MultiThreading *create()
+	static SizeStackPrinting *create()
 	{
-		return new (std::nothrow) MultiThreading;
+		return new (std::nothrow) SizeStackPrinting;
 	}
 
 protected:
 
-	MultiThreading();
-	virtual ~MultiThreading() {}
+	SizeStackPrinting();
+	virtual ~SizeStackPrinting() {}
 
 private:
 
-	MultiThreading(const MultiThreading &) : Processing("") {}
-	MultiThreading &operator=(const MultiThreading &) { return *this; }
+	SizeStackPrinting(const SizeStackPrinting &) : Processing("") {}
+	SizeStackPrinting &operator=(const SizeStackPrinting &) { return *this; }
 
 	/*
 	 * Naming of functions:  objectVerb()
@@ -58,9 +57,10 @@ private:
 	Success process();
 	void processInfo(char *pBuf, char *pBufEnd);
 
+	void sizeStackPrint();
+
 	/* member variables */
 	uint32_t mStartMs;
-	SizeStackPrinting *mpPrint;
 
 	/* static functions */
 

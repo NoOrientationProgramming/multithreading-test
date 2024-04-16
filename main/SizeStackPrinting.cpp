@@ -23,12 +23,11 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "MultiThreading.h"
+#include "SizeStackPrinting.h"
 
 #define dForEach_ProcState(gen) \
 		gen(StStart) \
 		gen(StMain) \
-		gen(StTmp) \
 
 #define dGenProcStateEnum(s) s,
 dProcessStateEnum(ProcState);
@@ -42,17 +41,16 @@ using namespace std;
 
 #define LOG_LVL	0
 
-MultiThreading::MultiThreading()
-	: Processing("MultiThreading")
+SizeStackPrinting::SizeStackPrinting()
+	: Processing("SizeStackPrinting")
 	, mStartMs(0)
-	, mpPrint(NULL)
 {
 	mState = StStart;
 }
 
 /* member functions */
 
-Success MultiThreading::process()
+Success SizeStackPrinting::process()
 {
 	//uint32_t curTimeMs = millis();
 	//uint32_t diffMs = curTimeMs - mStartMs;
@@ -64,20 +62,14 @@ Success MultiThreading::process()
 	{
 	case StStart:
 
-		mpPrint = SizeStackPrinting::create();
-		if (!mpPrint)
-			return procErrLog(-1, "could not create process");
-
-		start(mpPrint);
-		whenFinishedRepel(mpPrint);
-
 		mState = StMain;
 
 		break;
 	case StMain:
 
-		break;
-	case StTmp:
+		sizeStackPrint();
+
+		return Positive;
 
 		break;
 	default:
@@ -87,7 +79,42 @@ Success MultiThreading::process()
 	return Pending;
 }
 
-void MultiThreading::processInfo(char *pBuf, char *pBufEnd)
+void SizeStackPrinting::sizeStackPrint()
+{
+	pthread_attr_t attrThread;
+	bool initConfigDone = false;
+	int res;
+	size_t sizeStack;
+
+	res = pthread_attr_init(&attrThread);
+	if (res)
+	{
+		errLog(-1, "could not initialize thread attributes: %s (%d)", strerror(errno), errno);
+		goto drvExit;
+	}
+
+	initConfigDone = true;
+
+	res = pthread_attr_getstacksize(&attrThread, &sizeStack);
+	if (res)
+	{
+		errLog(-1, "could not get stack size: %s (%d)", strerror(errno), errno);
+		goto drvExit;
+	}
+
+	procWrnLog("Stack size: 0x%08x, %zu", sizeStack, sizeStack);
+
+drvExit:
+
+	if (initConfigDone)
+	{
+		res = pthread_attr_destroy(&attrThread);
+		if (res)
+			errLog(-1, "could not destroy thread attributes: %s (%d)", strerror(errno), errno);
+	}
+}
+
+void SizeStackPrinting::processInfo(char *pBuf, char *pBufEnd)
 {
 #if 1
 	dInfo("State\t\t\t%s\n", ProcStateString[mState]);

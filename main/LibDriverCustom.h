@@ -23,52 +23,38 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MULTI_THREADING_H
-#define MULTI_THREADING_H
+#ifndef LIB_DRIVER_CUSTOM_H
+#define LIB_DRIVER_CUSTOM_H
+
+#include <pthread.h>
 
 #include "Processing.h"
-#include "SizeStackPrinting.h"
 
-class MultiThreading : public Processing
+struct DriverCustomConfig
 {
-
-public:
-
-	static MultiThreading *create()
-	{
-		return new (std::nothrow) MultiThreading;
-	}
-
-protected:
-
-	MultiThreading();
-	virtual ~MultiThreading() {}
-
-private:
-
-	MultiThreading(const MultiThreading &) : Processing("") {}
-	MultiThreading &operator=(const MultiThreading &) { return *this; }
-
-	/*
-	 * Naming of functions:  objectVerb()
-	 * Example:              peerAdd()
-	 */
-
-	/* member functions */
-	Success process();
-	void processInfo(char *pBuf, char *pBufEnd);
-
-	/* member variables */
-	uint32_t mStartMs;
-	SizeStackPrinting *mpPrint;
-
-	/* static functions */
-
-	/* static variables */
-
-	/* constants */
-
+	size_t sizeStack;
 };
+
+struct DriverCustom
+{
+	pthread_t thread;
+	DriverCustomConfig config;
+	FuncInternalDrive pFctDrive;
+	void *pProc;
+};
+
+/*
+ * Literature
+ * - https://man7.org/linux/man-pages/man3/pthread_create.3.html
+ * - https://man7.org/linux/man-pages/man3/pthread_join.3.html
+ * - https://man7.org/linux/man-pages/man3/pthread_attr_init.3.html
+ * - https://man7.org/linux/man-pages/man3/pthread_attr_setstacksize.3.html
+ */
+#if defined(__linux__)
+void internalDrive(void *pData);
+void *internalDriverCreate(FuncInternalDrive pFctDrive, void *pProc, void *pConfigDriver);
+void internalDriverCleanUp(void *pDriver);
+#endif
 
 #endif
 

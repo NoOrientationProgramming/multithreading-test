@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "AppSupervising.h"
+#include "LibDriverCustom.h"
 
 using namespace std;
 
@@ -21,11 +22,16 @@ int main(int argc, char *argv[])
 	(void)argc;
 	(void)argv;
 
-	levelLogSet(4);
-
 	signal(SIGINT, applicationCloseRequested);
 	signal(SIGTERM, applicationCloseRequested);
 
+	levelLogSet(5);
+#if defined(__linux__)
+	Processing::internalDriveSet(internalDrive);
+	Processing::internalDriverCreateAndCleanUpSet(
+				internalDriverCreate,
+				internalDriverCleanUp);
+#endif
 	pApp = AppSupervising::create();
 	if (!pApp)
 	{
