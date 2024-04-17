@@ -16,7 +16,7 @@ The file ```LibDriverPlatform``` implements the creation of drivers for popular 
 ## Usage
 
 Compile LibDriverPlatform.cpp from ```ProcessingCommon``` and include its header file.
-Then, set the functions from LibDriverPlatform as the default way to create an internal driver
+At application startup, set the functions from LibDriverPlatform as the default method for creating an internal driver
 ```cpp
 Processing::driverInternalCreateAndCleanUpSet(driverPlatformCreate, driverPlatformCleanUp);
 ```
