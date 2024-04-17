@@ -11,6 +11,7 @@ deps += dependency('threads')
 
 args = []
 args += '-DCONFIG_PROC_HAVE_LOG=1'
+args += '-DCONFIG_PROC_HAVE_DRIVERS=1'
 args += '-DCONFIG_PROC_INFO_BUFFER_SIZE=1024'
 args += '-std=gnu++11'
 
@@ -64,14 +65,14 @@ myApp = executable(
 		'components/ProcessingCore/SystemCommanding.cpp',
 		'components/ProcessingCore/TcpListening.cpp',
 		'components/ProcessingCore/TcpTransfering.cpp',
+		'components/ProcessingCommon/ThreadPooling.cpp',
 		'components/ProcessingCommon/LibTime.cpp',
 		'components/ProcessingCommon/LibFilesys.cpp',
-		'components/ProcessingCommon/ThreadPooling.cpp',
+		'components/ProcessingCommon/LibDriverPlatform.cpp',
 		'main/main.cpp',
 		'main/AppSupervising.cpp',
 		'main/MultiThreading.cpp',
 		'main/SizeStackPrinting.cpp',
-		'main/LibDriverCustom.cpp',
 	],
 	include_directories : include_directories([
 		'components/ProcessingCore',

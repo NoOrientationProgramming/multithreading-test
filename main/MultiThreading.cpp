@@ -24,11 +24,21 @@
 */
 
 #include "MultiThreading.h"
+#include "LibDriverPlatform.h"
 
 #define dForEach_ProcState(gen) \
 		gen(StStart) \
-		gen(StMain) \
-		gen(StTmp) \
+		gen(StTest1Start) \
+		gen(StTest1DoneWait) \
+		gen(StDriveSwitch) \
+		gen(StTest2Start) \
+		gen(StTest2DoneWait) \
+		gen(StDriverSwitch) \
+		gen(StTest3Start) \
+		gen(StTest3DoneWait) \
+		gen(StDefaultConfigSwitch) \
+		gen(StTest4Start) \
+		gen(StTest4DoneWait) \
 
 #define dGenProcStateEnum(s) s,
 dProcessStateEnum(ProcState);
@@ -45,7 +55,7 @@ using namespace std;
 MultiThreading::MultiThreading()
 	: Processing("MultiThreading")
 	, mStartMs(0)
-	, mpPrint(NULL)
+	, mCheckEnabled(false)
 {
 	mState = StStart;
 }
@@ -56,7 +66,7 @@ Success MultiThreading::process()
 {
 	//uint32_t curTimeMs = millis();
 	//uint32_t diffMs = curTimeMs - mStartMs;
-	//Success success;
+	Success success;
 #if 0
 	dStateTrace;
 #endif
@@ -64,20 +74,130 @@ Success MultiThreading::process()
 	{
 	case StStart:
 
-		mpPrint = SizeStackPrinting::create();
-		if (!mpPrint)
-			return procErrLog(-1, "could not create process");
-
-		start(mpPrint);
-		whenFinishedRepel(mpPrint);
-
-		mState = StMain;
+		mState = StTest1Start;
 
 		break;
-	case StMain:
+	case StTest1Start:
+
+		success = childrenStart();
+		if (success != Positive)
+			return procErrLog(-1, "could not start children");
+
+		mState = StTest1DoneWait;
 
 		break;
-	case StTmp:
+	case StTest1DoneWait:
+
+		success = childrenSuccess();
+		if (success == Pending)
+			break;
+
+		if (success != Positive)
+			return procErrLog(-1, "tests failed");
+
+		childrenRepel();
+
+		mState = StDriveSwitch;
+
+		break;
+	case StDriveSwitch:
+
+		procErrLog(-1, "using custom drive function");
+#ifndef CONFIG_PROC_HAVE_DRIVERS
+		Processing::internalDriveSet(customInternalDrive);
+#endif
+		mState = StTest2Start;
+
+		break;
+	case StTest2Start:
+
+		success = childrenStart();
+		if (success != Positive)
+			return procErrLog(-1, "could not start children");
+
+		mState = StTest2DoneWait;
+
+		break;
+	case StTest2DoneWait:
+
+		success = childrenSuccess();
+		if (success == Pending)
+			break;
+
+		if (success != Positive)
+			return procErrLog(-1, "tests failed");
+
+		childrenRepel();
+
+		mState = StDriverSwitch;
+
+		break;
+	case StDriverSwitch:
+
+		procErrLog(-1, "using platform driver");
+#if CONFIG_PROC_HAVE_DRIVERS
+		Processing::driverInternalCreateAndCleanUpSet(
+				driverPlatformCreate,
+				driverPlatformCleanUp);
+
+		mCheckEnabled = true;
+#endif
+		mState = StTest3Start;
+
+		break;
+	case StTest3Start:
+
+		success = childrenStart();
+		if (success != Positive)
+			return procErrLog(-1, "could not start children");
+
+		mState = StTest3DoneWait;
+
+		break;
+	case StTest3DoneWait:
+
+		success = childrenSuccess();
+		if (success == Pending)
+			break;
+
+		if (success != Positive)
+			return procErrLog(-1, "tests failed");
+
+		childrenRepel();
+
+		mState = StDefaultConfigSwitch;
+
+		break;
+	case StDefaultConfigSwitch:
+
+		procErrLog(-1, "using custom default stack size");
+
+		ConfigDriver::sizeStackDefaultSet(0x1000000);
+
+		mState = StTest4Start;
+
+		break;
+	case StTest4Start:
+
+		success = childrenStart();
+		if (success != Positive)
+			return procErrLog(-1, "could not start children");
+
+		mState = StTest4DoneWait;
+
+		break;
+	case StTest4DoneWait:
+
+		success = childrenSuccess();
+		if (success == Pending)
+			break;
+
+		if (success != Positive)
+			return procErrLog(-1, "tests failed");
+
+		childrenRepel();
+
+		return Positive;
 
 		break;
 	default:
@@ -85,6 +205,75 @@ Success MultiThreading::process()
 	}
 
 	return Pending;
+}
+
+Success MultiThreading::childrenStart()
+{
+	SizeStackPrinting *pPrint;
+
+	// parent
+	pPrint = SizeStackPrinting::create();
+	if (!pPrint)
+		return procErrLog(-1, "could not create process");
+
+	start(pPrint);
+	mLstPrint.push_back(pPrint);
+
+	// new internal, config set by driver
+	pPrint = SizeStackPrinting::create();
+	if (!pPrint)
+		return procErrLog(-1, "could not create process");
+
+	start(pPrint, DrivenByNewInternalDriver);
+	mLstPrint.push_back(pPrint);
+
+	// new internal, config set by user, default config used
+	pPrint = SizeStackPrinting::create();
+	if (!pPrint)
+		return procErrLog(-1, "could not create process");
+
+	{
+		ConfigDriver config;
+#if CONFIG_PROC_HAVE_DRIVERS
+		pPrint->configDriverSet(&config);
+#endif
+		if (mCheckEnabled)
+			pPrint->mSizeStackCheck = config.mSizeStack;
+	}
+
+	start(pPrint, DrivenByNewInternalDriver);
+	mLstPrint.push_back(pPrint);
+
+	// new internal, config set by user, config changed
+	pPrint = SizeStackPrinting::create();
+	if (!pPrint)
+		return procErrLog(-1, "could not create process");
+
+	{
+		ConfigDriver config;
+		config.mSizeStack <<= 1;
+#if CONFIG_PROC_HAVE_DRIVERS
+		pPrint->configDriverSet(&config);
+#endif
+		if (mCheckEnabled)
+			pPrint->mSizeStackCheck = config.mSizeStack;
+	}
+
+	start(pPrint, DrivenByNewInternalDriver);
+	mLstPrint.push_back(pPrint);
+
+	return Positive;
+}
+
+void MultiThreading::childrenRepel()
+{
+	list<SizeStackPrinting *>::iterator iter;
+
+	iter = mLstPrint.begin();
+	for (; iter != mLstPrint.end(); ++iter)
+		repel(*iter);
+
+	mLstPrint.clear();
 }
 
 void MultiThreading::processInfo(char *pBuf, char *pBufEnd)
@@ -95,4 +284,24 @@ void MultiThreading::processInfo(char *pBuf, char *pBufEnd)
 }
 
 /* static functions */
+#ifndef CONFIG_PROC_HAVE_DRIVERS
+void MultiThreading::customInternalDrive(void *pData)
+{
+	Processing *pChild = (Processing *)pData;
+
+	//wrnLog("started custom drive function");
+
+	while (1)
+	{
+		pChild->treeTick();
+		this_thread::sleep_for(chrono::milliseconds(2));
+
+		if (pChild->progress())
+			continue;
+
+		Processing::undrivenSet(pChild);
+		break;
+	}
+}
+#endif
 

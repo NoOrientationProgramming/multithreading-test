@@ -26,6 +26,8 @@
 #ifndef MULTI_THREADING_H
 #define MULTI_THREADING_H
 
+#include <list>
+
 #include "Processing.h"
 #include "SizeStackPrinting.h"
 
@@ -58,12 +60,18 @@ private:
 	Success process();
 	void processInfo(char *pBuf, char *pBufEnd);
 
+	Success childrenStart();
+	void childrenRepel();
+
 	/* member variables */
 	uint32_t mStartMs;
-	SizeStackPrinting *mpPrint;
+	bool mCheckEnabled;
+	std::list<SizeStackPrinting *> mLstPrint;
 
 	/* static functions */
-
+#ifndef CONFIG_PROC_HAVE_DRIVERS
+	static void customInternalDrive(void *pData);
+#endif
 	/* static variables */
 
 	/* constants */

@@ -38,6 +38,9 @@ public:
 		return new (std::nothrow) SizeStackPrinting;
 	}
 
+	size_t mSizeStackCheck;
+	size_t mSizeStack;
+
 protected:
 
 	SizeStackPrinting();
@@ -56,8 +59,6 @@ private:
 	/* member functions */
 	Success process();
 	void processInfo(char *pBuf, char *pBufEnd);
-
-	void sizeStackPrint();
 
 	/* member variables */
 	uint32_t mStartMs;

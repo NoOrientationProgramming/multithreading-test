@@ -24,6 +24,7 @@
 */
 
 #include "SizeStackPrinting.h"
+#include "LibDriverPlatform.h"
 
 #define dForEach_ProcState(gen) \
 		gen(StStart) \
@@ -43,6 +44,8 @@ using namespace std;
 
 SizeStackPrinting::SizeStackPrinting()
 	: Processing("SizeStackPrinting")
+	, mSizeStackCheck(0)
+	, mSizeStack(0)
 	, mStartMs(0)
 {
 	mState = StStart;
@@ -67,7 +70,16 @@ Success SizeStackPrinting::process()
 		break;
 	case StMain:
 
-		sizeStackPrint();
+		mSizeStack = sizeStackGet();
+		if (!mSizeStack)
+			return procErrLog(-1, "could not get stack size");
+
+		procWrnLog("Stack size: 0x%08x (%zu)", mSizeStack, mSizeStack);
+
+		if (mSizeStackCheck && mSizeStackCheck != mSizeStack)
+			return procErrLog(-1, "wrong stack size. Should be 0x%08x (%zu), but is 0x%08x (%zu)",
+					mSizeStackCheck, mSizeStackCheck,
+					mSizeStack, mSizeStack);
 
 		return Positive;
 
@@ -77,41 +89,6 @@ Success SizeStackPrinting::process()
 	}
 
 	return Pending;
-}
-
-void SizeStackPrinting::sizeStackPrint()
-{
-	pthread_attr_t attrThread;
-	bool initConfigDone = false;
-	int res;
-	size_t sizeStack;
-
-	res = pthread_attr_init(&attrThread);
-	if (res)
-	{
-		errLog(-1, "could not initialize thread attributes: %s (%d)", strerror(errno), errno);
-		goto drvExit;
-	}
-
-	initConfigDone = true;
-
-	res = pthread_attr_getstacksize(&attrThread, &sizeStack);
-	if (res)
-	{
-		errLog(-1, "could not get stack size: %s (%d)", strerror(errno), errno);
-		goto drvExit;
-	}
-
-	procWrnLog("Stack size: 0x%08x, %zu", sizeStack, sizeStack);
-
-drvExit:
-
-	if (initConfigDone)
-	{
-		res = pthread_attr_destroy(&attrThread);
-		if (res)
-			errLog(-1, "could not destroy thread attributes: %s (%d)", strerror(errno), errno);
-	}
 }
 
 void SizeStackPrinting::processInfo(char *pBuf, char *pBufEnd)
