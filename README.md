@@ -32,9 +32,11 @@ pPrint = SizeStackPrinting::create();
 if (!pPrint)
     return procErrLog(-1, "could not create process");
 
+// optional
 ConfigDriver config;
 config.mSizeStack <<= 1;
 pPrint->configDriverSet(&config);
+// optional: end
 
 start(pPrint, DrivenByNewInternalDriver);
 ```
