@@ -102,8 +102,8 @@ Success MultiThreading::process()
 		break;
 	case StDriveSwitch:
 
-		procErrLog(-1, "using custom drive function");
-#ifndef CONFIG_PROC_HAVE_DRIVERS
+		procWrnLog("using custom drive function");
+#if CONFIG_PROC_HAVE_DRIVERS
 		Processing::internalDriveSet(customInternalDrive);
 #endif
 		mState = StTest2Start;
@@ -134,7 +134,7 @@ Success MultiThreading::process()
 		break;
 	case StDriverSwitch:
 
-		procErrLog(-1, "using platform driver");
+		procWrnLog("using platform driver");
 #if CONFIG_PROC_HAVE_DRIVERS
 		Processing::driverInternalCreateAndCleanUpSet(
 				driverPlatformCreate,
@@ -170,7 +170,7 @@ Success MultiThreading::process()
 		break;
 	case StDefaultConfigSwitch:
 
-		procErrLog(-1, "using custom default stack size");
+		procWrnLog("using custom default stack size");
 
 		ConfigDriver::sizeStackDefaultSet(0x1000000);
 
@@ -284,7 +284,7 @@ void MultiThreading::processInfo(char *pBuf, char *pBufEnd)
 }
 
 /* static functions */
-#ifndef CONFIG_PROC_HAVE_DRIVERS
+#if CONFIG_PROC_HAVE_DRIVERS
 void MultiThreading::customInternalDrive(void *pData)
 {
 	Processing *pChild = (Processing *)pData;

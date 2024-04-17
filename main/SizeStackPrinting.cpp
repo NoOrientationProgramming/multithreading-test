@@ -74,7 +74,7 @@ Success SizeStackPrinting::process()
 		if (!mSizeStack)
 			return procErrLog(-1, "could not get stack size");
 
-		procWrnLog("Stack size: 0x%08x (%zu)", mSizeStack, mSizeStack);
+		procInfLog("Stack size: 0x%08x (%zu)", mSizeStack, mSizeStack);
 
 		if (mSizeStackCheck && mSizeStackCheck != mSizeStack)
 			return procErrLog(-1, "wrong stack size. Should be 0x%08x (%zu), but is 0x%08x (%zu)",

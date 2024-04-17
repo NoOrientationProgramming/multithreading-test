@@ -69,7 +69,7 @@ private:
 	std::list<SizeStackPrinting *> mLstPrint;
 
 	/* static functions */
-#ifndef CONFIG_PROC_HAVE_DRIVERS
+#if CONFIG_PROC_HAVE_DRIVERS
 	static void customInternalDrive(void *pData);
 #endif
 	/* static variables */
