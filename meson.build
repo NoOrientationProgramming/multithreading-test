@@ -6,6 +6,8 @@ project(
 
 cxx = meson.get_compiler('cpp')
 
+# Sources
+
 srcs = [
 	'components/ProcessingCore/Processing.cpp',
 	'components/ProcessingCore/Log.cpp',
@@ -25,23 +27,16 @@ if host_machine.system() == 'linux'
 	srcs += 'components/ProcessingCommon/LibFilesys.cpp'
 endif
 
-deps = []
-deps += dependency('threads')
+# Arguments
 
-args = []
-args += '-DCONFIG_PROC_HAVE_LOG=1'
-args += '-DCONFIG_PROC_HAVE_DRIVERS=1'
-args += '-DCONFIG_PROC_INFO_BUFFER_SIZE=1024'
-args += '-std=gnu++11'
-
-if host_machine.system() == 'windows'
-	args += '-D_WIN32_WINNT=_WIN32_WINNT_WIN10'
-	args += '-DWINVER=_WIN32_WINNT_WIN10'
-	deps += cxx.find_library('ws2_32')
-endif
+args = [
+	'-DCONFIG_PROC_HAVE_LOG=1',
+	'-CONFIG_PROC_HAVE_DRIVERS=1',
+	'-DCONFIG_PROC_INFO_BUFFER_SIZE=1024',
+]
 
 # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-warnings = [
+warningsLinux = [
 	'-Wall',
 	'-Wextra',
 	'-Wpedantic',
@@ -73,7 +68,29 @@ warnings = [
 	'-Wshadow',
 ]
 
-args += warnings
+if host_machine.system() == 'windows'
+	args += '-D_WIN32_WINNT=_WIN32_WINNT_WIN10'
+	args += '-DWINVER=_WIN32_WINNT_WIN10'
+endif
+
+if cxx.get_id() == 'msvc'
+	args += '/std:c11'
+elif cxx.get_id() == 'gcc'
+	args += warningsLinux
+	args += '-std=gnu++11'
+endif
+
+# Dependencies
+
+deps = [
+	dependency('threads'),
+]
+
+if host_machine.system() == 'windows'
+	deps += cxx.find_library('ws2_32')
+endif
+
+# Application
 
 myApp = executable(
 	'app',
