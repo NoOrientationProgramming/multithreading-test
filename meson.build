@@ -14,7 +14,6 @@ srcs = [
 	'components/ProcessingCore/TcpListening.cpp',
 	'components/ProcessingCore/TcpTransfering.cpp',
 	'components/ProcessingCommon/ThreadPooling.cpp',
-	'components/ProcessingCommon/LibTime.cpp',
 	'components/ProcessingCommon/LibDriverPlatform.cpp',
 	'main/main.cpp',
 	'main/AppSupervising.cpp',
