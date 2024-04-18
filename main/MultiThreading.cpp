@@ -54,7 +54,7 @@ using namespace std;
 
 MultiThreading::MultiThreading()
 	: Processing("MultiThreading")
-	, mStartMs(0)
+	//, mStartMs(0)
 	, mCheckEnabled(false)
 {
 	mState = StStart;

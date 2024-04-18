@@ -61,7 +61,7 @@ private:
 	void processInfo(char *pBuf, char *pBufEnd);
 
 	/* member variables */
-	uint32_t mStartMs;
+	//uint32_t mStartMs;
 
 	/* static functions */
 

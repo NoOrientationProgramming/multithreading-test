@@ -64,7 +64,7 @@ private:
 	void childrenRepel();
 
 	/* member variables */
-	uint32_t mStartMs;
+	//uint32_t mStartMs;
 	bool mCheckEnabled;
 	std::list<SizeStackPrinting *> mLstPrint;
 

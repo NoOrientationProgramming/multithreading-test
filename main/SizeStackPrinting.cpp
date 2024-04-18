@@ -46,7 +46,7 @@ SizeStackPrinting::SizeStackPrinting()
 	: Processing("SizeStackPrinting")
 	, mSizeStackCheck(0)
 	, mSizeStack(0)
-	, mStartMs(0)
+	//, mStartMs(0)
 {
 	mState = StStart;
 }

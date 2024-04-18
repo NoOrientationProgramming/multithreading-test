@@ -62,7 +62,7 @@ static bool procTreeSaveInProgress = false;
 
 AppSupervising::AppSupervising()
 	: Processing("AppSupervising")
-	, mStartMs(0)
+	//, mStartMs(0)
 	, mpMulti(NULL)
 {
 	mState = StStart;
