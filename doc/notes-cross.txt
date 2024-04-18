@@ -1,0 +1,59 @@
+
+Literature
+- https://learn.microsoft.com/en-us/cpp/build/reference/za-ze-disable-language-extensions?view=msvc-170
+- https://developercommunity.visualstudio.com/t/alternative-keywords-in-c-is-not-supported/781344
+- https://stackoverflow.com/questions/47489894/compiler-says-logical-and-is-undefined-identifier
+- https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=msvc-170
+- https://mesonbuild.com/Reference-manual_returned_compiler.html#compilerget_id
+- https://stackoverflow.com/questions/10046114/in-cmake-how-can-i-test-if-the-compiler-is-clang
+- https://cmake.org/cmake/help/latest/command/add_compile_options.html
+- https://stackoverflow.com/questions/2224334/gcc-dump-preprocessor-defines
+
+--------------------------------
+Compiler defines
+
+echo | gcc -dM -E -
+echo | clang -dM -E -
+
+echo | g++ -dM -E -x c++ -
+echo | clang++ -dM -E -x c++ -
+
+echo | x86_64-w64-mingw32-g++ -dM -E -x c++ -
+
+--------------------------------
+Cross Toolchain in Linux
+
+Windows
+
+apt install mingw-w64
+update-alternatives --config x86_64-w64-mingw32-g++
+
+Raspberry Pi
+
+apt install gcc-arm-linux-gnueabihf
+apt install g++-arm-linux-gnueabihf
+
+--------------------------------
+Meson
+
+meson setup build-meson-native
+ninja -C build-meson-native
+
+meson setup --cross-file tools/meson-cross-win64.txt build-meson-win64
+ninja -C build-meson-win64
+
+meson setup --cross-file tools/meson-cross-rpi.txt build-meson-rpi
+ninja -C build-meson-rpi
+
+--------------------------------
+CMake
+
+cmake -DCMAKE_BUILD_TYPE=Release -S . -B build-cmake-native
+cmake --build build-cmake-native
+
+cmake --toolchain tools/CMake-toolchain-win64.cmake -DCMAKE_BUILD_TYPE=Release -S . -B build-cmake-win64
+cmake --build build-cmake-win64
+
+cmake --toolchain tools/CMake-toolchain-rpi.cmake -DCMAKE_BUILD_TYPE=Release -S . -B build-cmake-rpi
+cmake --build build-cmake-rpi
+
