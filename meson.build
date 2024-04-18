@@ -71,13 +71,14 @@ warningsLinux = [
 if host_machine.system() == 'windows'
 	args += '-D_WIN32_WINNT=_WIN32_WINNT_WIN10'
 	args += '-DWINVER=_WIN32_WINNT_WIN10'
+else
+	args += '-std=gnu++11'
 endif
 
 if cxx.get_id() == 'msvc'
 	args += '/std:c11'
 elif cxx.get_id() == 'gcc'
 	args += warningsLinux
-	args += '-std=gnu++11'
 endif
 
 # Dependencies
