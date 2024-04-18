@@ -1,0 +1,45 @@
+
+name: Windows Native
+
+on:
+  workflow_dispatch
+
+jobs:
+
+  windows-native-build-run:
+    runs-on: windows-latest
+    steps:
+
+# Toolchain + git
+
+      - name: Set up Visual Studio Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: 14.30
+          arch: x64
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install build tools
+        run: python -m pip install meson ninja cmake
+
+      - uses: actions/checkout@v4
+      - name: Initialize git submodules
+        run: git submodule update --init --recursive
+
+# Native meson + cmake
+
+      - name: Setup build directory meson
+        run: meson setup build-meson-native
+      - name: Build application meson
+        run: ninja -C build-meson-native
+      - name: Start application meson
+        run: ./build-meson-native/app
+
+      - name: Setup build directory cmake
+        run: cmake -S . -B build-cmake-native
+      - name: Build application cmake
+        run: cmake --build build-cmake-native --config Release -j
+      - name: Start application cmake
+        run: ./build-cmake-native/Release/app.exe
+
