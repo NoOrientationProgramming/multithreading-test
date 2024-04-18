@@ -139,8 +139,9 @@ Success MultiThreading::process()
 		Processing::driverInternalCreateAndCleanUpSet(
 				driverPlatformCreate,
 				driverPlatformCleanUp);
-
+#if defined(__linux__)
 		mCheckEnabled = true;
+#endif
 #endif
 		mState = StTest3Start;
 
