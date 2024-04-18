@@ -6,6 +6,26 @@ project(
 
 cxx = meson.get_compiler('cpp')
 
+srcs = [
+	'components/ProcessingCore/Processing.cpp',
+	'components/ProcessingCore/Log.cpp',
+	'components/ProcessingCore/SystemDebugging.cpp',
+	'components/ProcessingCore/SystemCommanding.cpp',
+	'components/ProcessingCore/TcpListening.cpp',
+	'components/ProcessingCore/TcpTransfering.cpp',
+	'components/ProcessingCommon/ThreadPooling.cpp',
+	'components/ProcessingCommon/LibTime.cpp',
+	'components/ProcessingCommon/LibDriverPlatform.cpp',
+	'main/main.cpp',
+	'main/AppSupervising.cpp',
+	'main/MultiThreading.cpp',
+	'main/SizeStackPrinting.cpp',
+]
+
+if host_machine.system() == 'linux'
+	srcs += 'components/ProcessingCommon/LibFilesys.cpp'
+endif
+
 deps = []
 deps += dependency('threads')
 
@@ -59,20 +79,7 @@ args += warnings
 myApp = executable(
 	'app',
 	[
-		'components/ProcessingCore/Processing.cpp',
-		'components/ProcessingCore/Log.cpp',
-		'components/ProcessingCore/SystemDebugging.cpp',
-		'components/ProcessingCore/SystemCommanding.cpp',
-		'components/ProcessingCore/TcpListening.cpp',
-		'components/ProcessingCore/TcpTransfering.cpp',
-		'components/ProcessingCommon/ThreadPooling.cpp',
-		'components/ProcessingCommon/LibTime.cpp',
-		'components/ProcessingCommon/LibFilesys.cpp',
-		'components/ProcessingCommon/LibDriverPlatform.cpp',
-		'main/main.cpp',
-		'main/AppSupervising.cpp',
-		'main/MultiThreading.cpp',
-		'main/SizeStackPrinting.cpp',
+		srcs,
 	],
 	include_directories : include_directories([
 		'components/ProcessingCore',

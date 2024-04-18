@@ -23,13 +23,17 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#if defined(__linux__)
 #include <unistd.h>
 #include <signal.h>
+#endif
 
 #include "AppSupervising.h"
 #include "SystemDebugging.h"
 #include "MultiThreading.h"
+#if defined(__linux__)
 #include "LibFilesys.h"
+#endif
 
 #define dForEach_ProcState(gen) \
 		gen(StStart) \
@@ -48,11 +52,13 @@ using namespace std;
 
 #define LOG_LVL	0
 
+#if defined(__linux__)
 static Processing *pTreeRoot = NULL;
 static char nameApp[16];
 static char nameFileProc[64];
 static char buffProcTree[2*1024*1024];
 static bool procTreeSaveInProgress = false;
+#endif
 
 AppSupervising::AppSupervising()
 	: Processing("AppSupervising")
@@ -62,6 +68,7 @@ AppSupervising::AppSupervising()
 	mState = StStart;
 }
 
+#if defined(__linux__)
 static void procTreeSave()
 {
 	time_t now;
@@ -136,6 +143,7 @@ void coreDumpRequest(int signum)
 	wrnLog("Creating process tree file");
 	procTreeSave();
 }
+#endif
 
 /* member functions */
 
@@ -144,21 +152,19 @@ Success AppSupervising::process()
 	//uint32_t curTimeMs = millis();
 	//uint32_t diffMs = curTimeMs - mStartMs;
 	Success success;
-	bool ok;
 #if 0
 	dStateTrace;
 #endif
 	switch (mState)
 	{
 	case StStart:
-
+#if defined(__linux__)
 		pTreeRoot = this;
 		signal(SIGABRT, coreDumpRequest);
 
-		ok = coreDumpsEnable(coreDumpRequest);
-		if (!ok)
+		if (!coreDumpsEnable(coreDumpRequest))
 			procWrnLog("could not enable core dumps");
-
+#endif
 		dbgStart();
 
 		mpMulti = MultiThreading::create();
